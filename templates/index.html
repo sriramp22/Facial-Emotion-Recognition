@@ -1,1 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Facial Emotion Analyzer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+  <!--
+    url_for('static', filename='style.css') is a Flask Jinja2 template tag.
+    It generates the correct URL path to the file in the /static/ folder.
+    This ensures the path works correctly regardless of where Flask is hosted.
+  -->
+</head>
+<body>
 
+  <div class="page-wrapper">
+
+    <!-- ── HEADER ───────────────────────────────────────── -->
+    <header>
+      <h1>Facial Emotion Analyzer</h1>
+      <p>Upload a photo or use your webcam to detect emotions in real time</p>
+    </header>
+
+    <!-- ── MODE TABS ────────────────────────────────────── -->
+    <!--
+      Two tabs switch between Upload mode and Webcam mode.
+      Clicking a tab calls switchMode() in script.js which shows
+      the correct input section and hides the other.
+    -->
+    <div class="tabs">
+      <button class="tab active" id="tab-upload" onclick="switchMode('upload')">
+        Upload Photo
+      </button>
+      <button class="tab" id="tab-webcam" onclick="switchMode('webcam')">
+        Use Webcam
+      </button>
+    </div>
+
+    <!-- ── MAIN CONTENT GRID ────────────────────────────── -->
+    <div class="main-grid">
+
+      <!-- LEFT: Input panel -->
+      <div class="panel input-panel">
+
+        <!-- UPLOAD MODE UI -->
+        <div id="upload-ui">
+          <!--
+            Drop zone: clicking it triggers the hidden file input below.
+            The ondragover/ondrop handlers in script.js also allow
+            dragging and dropping an image file directly onto this area.
+          -->
+          <div class="drop-zone"
+               id="drop-zone"
+               onclick="document.getElementById('file-input').click()"
+               ondragover="handleDragOver(event)"
+               ondrop="handleDrop(event)">
+
+            <!-- Preview image — hidden until user picks a file -->
+            <img id="upload-preview" src="" alt="Preview" />
+
+            <!-- Placeholder shown before any file is selected -->
+            <div class="drop-placeholder" id="drop-placeholder">
+              <div class="drop-icon">&#128247;</div>
+              <p>Click to upload or drag & drop an image here</p>
+              <span>JPG, PNG or WebP &bull; max 10MB</span>
+            </div>
+          </div>
+
+          <!--
+            Hidden file input — clicking the drop zone above
+            programmatically triggers this via JavaScript.
+            accept="image/*" restricts the file picker to images only.
+          -->
+          <input
+            type="file"
+            id="file-input"
+            accept="image/jpeg, image/png, image/webp"
+            onchange="handleFileSelect(event)"
+          />
+
+          <button class="btn primary" id="analyze-upload-btn"
+                  onclick="analyzeUpload()" disabled>
+            Analyze Emotion
+          </button>
+        </div>
+
+        <!-- WEBCAM MODE UI -->
+        <div id="webcam-ui" style="display:none;">
+          <!--
+            The <video> element streams live webcam footage.
+            autoplay   : starts playing immediately once the stream is attached
+            muted      : required by browsers to allow autoplay
+            playsinline: prevents iOS Safari from going fullscreen
+          -->
+          <div class="video-container">
+            <video id="webcam-video" autoplay muted playsinline></video>
+            <div class="webcam-placeholder" id="webcam-placeholder">
+              <div class="drop-icon">&#127909;</div>
+              <p>Click "Start Camera" to begin</p>
+            </div>
+          </div>
+
+          <div class="webcam-controls">
+            <button class="btn primary" id="start-cam-btn" onclick="startCamera()">
+              Start Camera
+            </button>
+            <button class="btn" id="snap-btn" onclick="captureAndAnalyze()" disabled>
+              Capture & Analyze
+            </button>
+            <button class="btn danger" id="stop-cam-btn" onclick="stopCamera()" disabled>
+              Stop Camera
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Results panel -->
+      <div class="panel results-panel">
+        <div class="results-header">Emotion Results</div>
+
+        <!--
+          Results area — dynamically filled by renderResults() in script.js.
+          Initially shows a placeholder message.
+        -->
+        <div id="results-area">
+          <p class="results-placeholder">
+            Results will appear here after analysis.
+          </p>
+        </div>
+      </div>
+
+    </div><!-- /.main-grid -->
+
+  </div><!-- /.page-wrapper -->
+
+  <!--
+    Load script.js at the bottom of <body> so all HTML elements
+    exist in the DOM before the JavaScript tries to reference them.
+  -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
